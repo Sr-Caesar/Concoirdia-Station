@@ -1,0 +1,45 @@
+﻿@using ConcordiaStation.Data.Enum
+@model ConcordiaStation.WebApp.ViewModels.CardIndexViewModel
+@{
+    ViewData["Title"] = "Concordia Station";
+}
+<h1 class="text-center">@ViewData["Title"]</h1>
+<div class="row">
+    @foreach (var experiment in Model.Experiment)
+    {
+        <div class="col-md-6">
+            <div class="text-center">
+                <h3 class="mb-3">@experiment.Title</h3>
+                <div class="list-group mb-3">
+                    @foreach (var phase in experiment.Phases.OrderByDescending(phase => phase.Priority))
+                    {
+                        string priorityColorClass = "";
+                        switch (phase.Priority)
+                        {
+                            case Priority.LowPriority:
+                                priorityColorClass = "list-group-item list-group-item-action list-group-item-success";
+                                break;
+                            case Priority.MediumPriority:
+                                priorityColorClass = "list-group-item list-group-item-action list-group-item-warning";
+                                break;
+                            case Priority.HighPriority:
+                                priorityColorClass = "list-group-item list-group-item-action list-group-item-danger";
+                                break;
+                            case Priority.NotDefined:
+                                priorityColorClass = "list-group-item list-group-item-action list-group-item-info";
+                                break;
+                            case Priority.RunningOutOfTime:
+                                priorityColorClass = "list-group-item list-group-item-action list-group-item-danger";
+                                break;
+                            default:
+                                break;
+                        }
+
+                        <a href="@Url.Action("Details", "Phase", new { phaseId = phase.Id })" class="@priorityColorClass dark-link">@phase.Title</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<hr />

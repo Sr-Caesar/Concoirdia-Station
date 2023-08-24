@@ -1,0 +1,131 @@
+﻿@using ConcordiaStation.Data.Enum
+@model ConcordiaStation.WebApp.ViewModels.PhaseDetailViewModel
+
+@{
+    ViewData["Title"] = "Task Detail";
+}
+
+@{
+    string priorityColorClass = "";
+    string backgroundPriority = "";
+
+    switch (Model.Priority)
+    {
+        case Priority.LowPriority:
+            priorityColorClass = "p-3 mb-2 bg-success text-white";
+            backgroundPriority = "rgba(188, 220, 205, 255)";
+            break;
+        case Priority.MediumPriority:
+            priorityColorClass = "p-3 mb-2 bg-warning text-dark";
+            backgroundPriority = "rgba(255, 237, 182, 255)";
+            break;
+        case Priority.HighPriority:
+            priorityColorClass = "p-3 mb-2 bg-danger text-white";
+            backgroundPriority = "rgba(245, 196, 201, 255)";
+            break;
+        case Priority.RunningOutOfTime:
+            priorityColorClass = "p-3 mb-2 bg-danger text-black";
+            backgroundPriority = "rgba(245, 196, 201, 255)";
+            break;
+        case Priority.NotDefined:
+            priorityColorClass = "p-3 mb-2 bg-primary text-white";
+            backgroundPriority = "rgba(106, 146, 212, 255)";
+            break;
+        default:
+            break;
+    }
+}
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h3 class="h3 @priorityColorClass">@Html.DisplayFor(model => model.Priority)</h3>
+        </div>
+    </div>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <h4>@Html.LabelFor(model => model.Title):</h4>
+            <p>@Html.DisplayFor(model => model.Title)</p>
+            <h4>@Html.LabelFor(model => model.Description):</h4>
+            <p>@Html.DisplayFor(model => model.Description)</p>
+            <h4>@Html.LabelFor(model => model.Deadline):</h4>
+            <p>@Html.DisplayFor(model => model.Deadline)</p>
+            <h4>@Html.LabelFor(model => model.Priority):</h4>
+            <p>@Html.DisplayFor(model => model.Priority)</p>
+            <h4>@Html.LabelFor(model => model.Status):</h4>
+            @using (Html.BeginForm("UpdateStatus", "Phase", FormMethod.Post, new { @class = "form-inline" }))
+            {
+                @Html.HiddenFor(model => model.Id)
+                <span>                @Html.DropDownListFor(model => model.Status, Enum.GetValues(typeof(Status)).Cast<Status>()
+                .Select(s => new SelectListItem { Text = s.ToString(), Value = s.ToString() }),
+                new { @class = "form-control mr-2 custom-select-sm" })
+                    <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                </span>
+
+            }
+
+        </div>
+        <div class="col-md-6">
+            <h4>@Html.LabelFor(model => model.Scientists)</h4>
+            <ul class="list-group mt-2">
+                @foreach (var scient in Model.Scientists)
+                {
+                    <li class="list-group-item">
+                        @scient.GivenName @scient.FamilyName
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+    <section class="container col-10 my-3 py-3" style="background-color: @backgroundPriority ">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-12 col-lg-10">
+                <div class="card text-dark">
+                    <div class="card-body p-4">
+                        <h4 class="mb-0">Recent comments</h4>
+                        <p class="fw-light mb-4 pb-2">Latest Comments section by users</p>
+                        @using (Html.BeginForm("InsertNewComment", "Phase", FormMethod.Post))
+                        {
+                            @Html.HiddenFor(model => model.Id)
+                            @Html.HiddenFor(model => model.Comments.Last().Id)
+                            <div class="form-floating">
+                                <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px" name="NewComment">@Model.NewComment</textarea>
+                                <label for="floatingTextarea2">Comments</label>
+                            </div>
+                            <button type="submit" class="btn btn-outline-primary">Submit</button>
+                        }
+                        <hr />
+                        @{
+                            int totalComments = Model.Comments.Count();
+                            for (int i = 0; i < 6 ; i++)
+                            {
+                                var comment = Model.Comments.ElementAt(totalComments - 1 - i);
+
+                                <div class="d-flex flex-start">
+                                    <div>
+                                        <h6 class="fw-bold mb-1">@comment.Scientist.FamilyName @comment.Scientist.GivenName</h6>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <p class="mb-0">
+                                                @comment.PublicationDate
+                                                <span class="badge bg-primary">@comment.Phase.Title</span>
+                                            </p>
+                                        </div>
+                                        <p class="mb-0">
+                                            <em>~"@comment.Content"</em>
+                                        </p>
+                                    </div>
+                                </div>
+                             <hr />
+                            }    
+                        }
+                        <a class="btn btn-primary" href="@Url.Action("ShowAllComment", "Comment",new { phaseId = Model.Id })" role="button">Vai a tutti i commenti</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+
